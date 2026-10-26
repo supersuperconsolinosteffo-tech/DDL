@@ -1,0 +1,21 @@
+{
+	"schemaVersion": 1,
+	"id": "utilityclient_bridge",
+	"version": "${version}",
+	"name": "UtilityClient Bridge",
+	"description": "Start-of-tick bridge for the UtilityClient native (C++) DLL. Contains no module or packet logic of its own: it only rings a JNI bell at ClientTickEvents.START_CLIENT_TICK.",
+	"authors": ["UtilityClient"],
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.utilityclient.bridge.UtilityBridgeMod"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"fabric-api": "*",
+		"minecraft": "1.21.11",
+		"java": ">=21"
+	}
+}
