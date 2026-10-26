@@ -1,0 +1,12 @@
+# Native build trees (dist/ holds the shipped binaries)
+native/build/
+native/build-*/
+
+# Gradle / Loom
+bridge-mod/.gradle/
+bridge-mod/build/
+bridge-mod/run/
+
+# Runtime output next to sources, if any
+*.log
+.utilityclient/
