@@ -43,10 +43,14 @@ dumpbin /dependents .\utilitymod_native.dll
 ### Install
 
 ```powershell
-$dest = Join-Path $env:APPDATA ".utilitymod\native"
+$dest = Join-Path $env:USERPROFILE ".utilitymod\native"   # == Java's user.home
 if (-not (Test-Path $dest)) { mkdir $dest }
 Copy-Item .\utilitymod_native.dll $dest
 ```
+
+`NativeBridge.getNativeDir()` resolves the directory from Java's
+`user.home` property (`C:\Users\<you>`), which is **not** `%APPDATA%`
+(`C:\Users\<you>\AppData\Roaming`).
 
 Then launch Minecraft 1.21.11 (Fabric) and press `INSERT` for the native menu,
 `O` for the Java dropdown menu.

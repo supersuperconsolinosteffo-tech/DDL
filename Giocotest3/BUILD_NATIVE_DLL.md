@@ -45,7 +45,8 @@ cmake --build build --config Release
 ```
 
 Or simply run `build.bat` from the project root, which performs the same steps
-and copies the result to `%APPDATA%\.utilitymod\native`.
+and copies the result to `%USERPROFILE%\.utilitymod\native`
+(where `NativeBridge.getNativeDir()` looks).
 
 Output (multi-config generator adds the configuration directory):
 
@@ -100,7 +101,7 @@ Notes for cross-compiling:
 ## Install the DLL
 
 ```powershell
-$nativeDir = Join-Path $env:APPDATA ".utilitymod\native"
+$nativeDir = Join-Path $env:USERPROFILE ".utilitymod\native"   # == Java's user.home
 if (-not (Test-Path $nativeDir)) { mkdir $nativeDir }
 Copy-Item -Path ".\build\bin\Release\utilitymod_native.dll" -Destination $nativeDir
 ```
@@ -227,7 +228,7 @@ The ImGui style uses:
    - Check that the DLL architecture matches (x64 only)
 
 ## Post-Build Checklist
-- [ ] DLL placed in `%APPDATA%\.utilitymod\native\`
+- [ ] DLL placed in `%USERPROFILE%\.utilitymod\native\`
 - [ ] Minecraft 1.21.11 with Fabric installed
 - [ ] Fabric API version compatible
 - [ ] Launch Minecraft once to verify auto-load

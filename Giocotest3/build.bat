@@ -105,9 +105,9 @@ echo ===========================================================================
 echo Output: %OUTDIR%\utilitymod_native.dll
 
 echo.
-echo Installing DLL to: %APPDATA%\.utilitymod\native
-mkdir "%APPDATA%\.utilitymod\native" 2>nul
-copy /y "%OUTDIR%\utilitymod_native.dll" "%APPDATA%\.utilitymod\native"
+echo Installing DLL to: %USERPROFILE%\.utilitymod\native
+mkdir "%USERPROFILE%\.utilitymod\native" 2>nul
+copy /y "%OUTDIR%\utilitymod_native.dll" "%USERPROFILE%\.utilitymod\native"
 
 echo.
 echo ============================================================================
