@@ -3,6 +3,8 @@
 
 #include "native_client.hpp"
 #include "jni/jni_bridge.hpp"
+#include "imgui_manager.hpp"
+#include "utilitymod_export.h"
 
 #include <jni.h>
 #include <mutex>
@@ -15,6 +17,18 @@ static bool libraryLoaded = false;
 
 // JNI native method implementations
 extern "C" {
+
+// Forward declarations (registered in JNI_OnLoad before their definitions)
+JNIEXPORT void JNICALL Java_com_utilitymod_nativeclient_NativeBridge_nativeLog(JNIEnv*, jclass, jstring);
+JNIEXPORT void JNICALL Java_com_utilitymod_nativeclient_NativeBridge_nativeError(JNIEnv*, jclass, jstring);
+JNIEXPORT void JNICALL Java_com_utilitymod_nativeclient_NativeBridge_requestTickAction(JNIEnv*, jclass, jint, jint, jobject);
+JNIEXPORT jdouble JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getPlayerX(JNIEnv*, jclass);
+JNIEXPORT jdouble JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getPlayerY(JNIEnv*, jclass);
+JNIEXPORT jdouble JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getPlayerZ(JNIEnv*, jclass);
+JNIEXPORT jfloat JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getPlayerYaw(JNIEnv*, jclass);
+JNIEXPORT jfloat JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getPlayerPitch(JNIEnv*, jclass);
+JNIEXPORT jboolean JNICALL Java_com_utilitymod_nativeclient_NativeBridge_isPlayerAlive(JNIEnv*, jclass);
+JNIEXPORT jint JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getEntityId(JNIEnv*, jclass);
 
 // Called when the native library is loaded by Java
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
@@ -117,8 +131,8 @@ JNIEXPORT void JNICALL Java_com_utilitymod_nativeclient_NativeBridge_requestTick
     }
 
     NativeClient::instance().requestTickAction(
-        static_cast<NativeClient::ModuleId>(moduleId),
-        static_cast<NativeClient::ActionId>(actionId),
+        static_cast<ModuleId>(moduleId),
+        static_cast<ActionId>(actionId),
         params
     );
 }
@@ -160,7 +174,7 @@ extern "C" {
 
 UTILITYMOD_API bool UtilityMod_Initialize() {
     std::call_once(initFlag, []() {
-        NativeClient::NativeConfig config;
+        NativeConfig config;
         config.enableImgui = true;
         config.enableHooks = true;
         config.enableJniBridge = true;
@@ -179,14 +193,14 @@ UTILITYMOD_API bool UtilityMod_IsLoaded() {
 
 UTILITYMOD_API void UtilityMod_SetModuleEnabled(int moduleId, bool enabled) {
     NativeClient::instance().setModuleState(
-        static_cast<NativeClient::ModuleId>(moduleId),
+        static_cast<ModuleId>(moduleId),
         enabled
     );
 }
 
 UTILITYMOD_API bool UtilityMod_IsModuleEnabled(int moduleId) {
     return NativeClient::instance().getModuleState(
-        static_cast<NativeClient::ModuleId>(moduleId)
+        static_cast<ModuleId>(moduleId)
     ).enabled;
 }
 
@@ -195,5 +209,7 @@ UTILITYMOD_API void UtilityMod_ToggleMenu() {
         NativeClient::instance().getImGui()->toggleMenu();
     }
 }
+
+} // extern "C"
 
 } // namespace utilitymod

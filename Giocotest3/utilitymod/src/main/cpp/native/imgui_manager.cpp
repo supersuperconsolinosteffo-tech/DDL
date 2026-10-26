@@ -3,6 +3,8 @@
 
 #include "imgui_manager.hpp"
 #include "native_client.hpp"
+#include "jni/jni_bridge.hpp"
+#include "hooks/minecraft_hooks.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
@@ -82,11 +84,19 @@ bool ImGuiManager::initialize() {
     colors[ImGuiCol_ResizeGripActive] = ImVec4(0.36f, 0.36f, 0.48f, 0.95f);
     colors[ImGuiCol_Tab] = ImVec4(0.14f, 0.14f, 0.21f, 0.86f);
     colors[ImGuiCol_TabHovered] = ImVec4(0.24f, 0.24f, 0.36f, 0.80f);
+#if defined(IMGUI_VERSION_NUM) && IMGUI_VERSION_NUM >= 19090
+    colors[ImGuiCol_TabSelected] = ImVec4(0.20f, 0.20f, 0.28f, 0.84f);
+    colors[ImGuiCol_TabDimmed] = ImVec4(0.14f, 0.14f, 0.21f, 0.82f);
+    colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.18f, 0.18f, 0.25f, 0.82f);
+#else
     colors[ImGuiCol_TabActive] = ImVec4(0.20f, 0.20f, 0.28f, 0.84f);
     colors[ImGuiCol_TabUnfocused] = ImVec4(0.14f, 0.14f, 0.21f, 0.82f);
     colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.18f, 0.18f, 0.25f, 0.82f);
+#endif
+#ifdef IMGUI_HAS_DOCK
     colors[ImGuiCol_DockingPreview] = ImVec4(0.54f, 0.71f, 0.98f, 1.00f);
     colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.14f, 0.14f, 0.21f, 1.00f);
+#endif
     colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
     colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -249,7 +259,7 @@ void ImGuiManager::renderDefaultMenu() {
         };
 
         for (int i = 0; i < 5; ++i) {
-            NativeClient::ModuleId id = static_cast<NativeClient::ModuleId>(i);
+            ModuleId id = static_cast<ModuleId>(i);
             auto& state = NativeClient::instance().getModuleState(id);
 
             bool enabled = state.enabled;

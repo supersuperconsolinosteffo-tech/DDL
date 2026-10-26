@@ -4,6 +4,8 @@
 #pragma once
 
 #include <cstdint>
+#include <array>
+#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -116,9 +118,15 @@ private:
     ErrorCallback errorCallback_;
     RequestTickActionCallback requestTickActionCallback_;
 
-    // Helper to call log callback safely
+public:
+    // Diagnostics (also used by the JNI entry points and sub-components)
     void log(const std::string& message);
     void error(const std::string& message);
+
+private:
+    // Components below forward their diagnostics through log()/error()
+    friend class MinecraftHooks;
+    friend class ImGuiManager;
 };
 
 } // namespace utilitymod

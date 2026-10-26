@@ -1,141 +1,75 @@
 # MinHook Setup for UtilityMod
 
-MinHook is a lightweight library for hooking functions on Windows, Linux, and macOS. 
-This mod uses the Windows version via MSVC, but the CMakeLists.txt is cross-platform.
+MinHook is a lightweight library for hooking functions on Windows, Linux, and macOS.
+This mod uses the Windows version.
 
-## Download MinHook
+## Status: vendored (no download needed)
 
-### Option A: Use the official GitHub release (recommended)
+MinHook is now checked into the repository, so the build works offline and does
+not depend on third-party downloads at build time:
 
-```powershell
-# From PowerShell in the minhook directory
-cd C:\Users\ciaoa\Desktop\Giocotest3\utilitymod\src\main\cpp\native\minhook
-
-# Download MinHook v2.8.2 source (or latest)
-# You can get it from: https://github.com/TsudaK/minhook/releases
-
-# Using curl/powershell:
-iwr https://github.com/TsudaK/minhook/releases/download/v2.8.2/minhook-v2.8.2-src.zip -OutFile minhook-src.zip
-Expand-Archive minhook-src.zip .
-# This creates minhook/ subdirectory with:
-#   buffer.c, hook.c, trampoline.c, (and optionally other files)
+```
+utilitymod/src/main/cpp/native/minhook/
+├── include/
+│   └── MinHook.h
+├── src/
+│   ├── buffer.c / buffer.h
+│   ├── hook.c
+│   ├── trampoline.c / trampoline.h
+│   └── hde/
+│       ├── hde32.c / hde32.h / table32.h
+│       ├── hde64.c / hde64.h / table64.h
+│       └── pstdint.h
+└── LICENSE.txt
 ```
 
-### Option B: Manual download
+The three files the build compiles are `src/buffer.c`, `src/hook.c` and
+`src/trampoline.c` (plus the HDE disassembler tables they depend on).
 
-1. Go to: https://github.com/TsudaK/minhook/releases
-2. Download the latest "src" ZIP release
-3. Extract to: `C:\Users\ciaoa\Desktop\Giocotest3\utilitymod\src\main\cpp\native\minhook\`
-4. Expected files after extraction:
-   - `buffer.c`
-   - `hook.c` 
-   - `trampoline.c`
-   - (Optionally: CMakeLists.txt, minhook.h, etc. - the CMakeLists.txt in the parent will use .c files)
+`CMakeLists.txt` adds `minhook/include` to the include path, which is how
+`hooks/minecraft_hooks.hpp` resolves `#include <MinHook.h>`.
 
-## Verify MinHook Installation
+## Verifying the vendored copy
 
-After extraction, verify these files exist:
-
-```powershell
-dir "C:\Users\ciaoa\Desktop\Giocotest3\utilitymod\src\main\cpp\native\minhook"
+```bash
+ls utilitymod/src/main/cpp/native/minhook/src
+# buffer.c  buffer.h  hde  hook.c  trampoline.c  trampoline.h
 ```
 
-Expected output (or similar):
-```
-Directory: C:\Users\ciaoa\Desktop\Giocotest3\utilitymod\src\main\cpp\native\minhook
+If any of those files is missing, restore the checkout — do **not** re-create
+them by download. Earlier versions of this project fetched them with:
 
-Mode                LastWriteTime         Length Name
-----                -------------         ------ ----
--a----        26/10/2026     12:46           3334 CMakeLists.txt    <-- from original project
--a----        26/10/2026     12:50           7841 entry_point.cpp
--a----        26/10/2026     12:49          10437 imgui_manager.cpp
-...
+```
+https://raw.githubusercontent.com/TsudaK/minhook/v2.8.2/src/hook.c
 ```
 
-You should see at minimum:
-- `buffer.c`
-- `hook.c`
-- `trampoline.c`
+That URL does not exist (the upstream project is `TsudaKageyu/minhook` and has
+no `v2.8.2` tag), so the downloads silently saved `404: Not Found` into the
+`.c` files, which then failed to compile.
+
+## Updating MinHook
+
+```bash
+curl -L -o minhook.tar.gz https://codeload.github.com/TsudaKageyu/minhook/tar.gz/refs/heads/master
+tar xzf minhook.tar.gz
+cp -r minhook-master/include/MinHook.h      utilitymod/src/main/cpp/native/minhook/include/
+cp    minhook-master/src/*.c minhook-master/src/*.h utilitymod/src/main/cpp/native/minhook/src/
+cp -r minhook-master/src/hde/*              utilitymod/src/main/cpp/native/minhook/src/hde/
+cp    minhook-master/LICENSE.txt            utilitymod/src/main/cpp/native/minhook/
+```
 
 ## MinHook License
 
-MinHook is released under the MIT License. See the MinHook repo for full license terms.
-
-The mod's CMakeLists.txt will compile these 3 `.c` files into the shared library automatically.
+MinHook is released under the MIT License. See `minhook/LICENSE.txt` for the
+full license terms.
 
 ## Cross-Platform Notes
 
-### Windows (MSVC) - This mod's primary target
-- MinHook compiles natively with MSVC
-- Links against system APIs (kernel32, user32, etc.)
-- The CMakeLists.txt defines `IMGUI_IMPL_WIN32` and `IMGUI_IMPL_DX11` for the ImGui backends
+### Windows (MSVC) - this mod's primary target
+MinHook compiles as C (the target enables both the `C` and `CXX` languages).
+MSVC links `psapi.lib` for `GetModuleInformation`, which the pattern scanner
+uses.
 
-### Linux
-- MinHook also has a Linux port
-- CMake would use `-DWIN32=0` / `UNIX` detection
-- Would link against `pthread` etc.
-
-### macOS
-- MinHook has limited macOS support
-- Would use DYLD interposing or similar techniques
-
-## For This Mod (Windows MSVC)
-
-The CMakeLists.txt at `utilitymod/src/main/cpp/native/CMakeLists.txt` includes:
-
-```cmake
-# MinHook sources
-set(MINHOOK_SOURCES
-    minhook/buffer.c
-    minhook/hook.c
-    minhook/trampoline.c
-)
-
-# Link Windows system libraries
-target_link_libraries(utilitymod_native PRIVATE
-    d3d11
-    dxgi
-    user32
-    gdi32
-    dwmapi
-)
-```
-
-These 3 source files + the Windows API links are all that's needed for the hooking functionality on Windows.
-
-## Build Order Summary
-
-1. **Download MinHook source** to `utilitymod/src/main/cpp/native/minhook/`
-   - Must have: `buffer.c`, `hook.c`, `trampoline.c`
-
-2. **Ensure imgui backends exist**:
-   - `utilitymod/src/main/cpp/native/imgui/backends/imgui_impl_win32.cpp`
-   - `utilitymod/src/main/cpp/native/imgui/backends/imgui_impl_dx11.cpp`
-
-3. **Build with CMake**:
-   ```powershell
-   mkdir build
-   cd build
-   cmake .. -G "Visual Studio 17 2022" -A x64
-   cmake --build . --config Release
-   ```
-
-4. **Install DLL**:
-   ```powershell
-   copy .\Release\utilitymod_native.dll $env:APPDATA\.utilitymod\native
-   ```
-
-5. **Launch Minecraft** with Fabric 1.21.11
-   - Press INSERT for native ImGui menu
-   - Press O for Java dropdown menu
-
-## MinHook Version Compatibility
-
-This project has been tested with MinHook v2.8.x. 
-Older versions (pre-2.0) may have API differences.
-The GitHub releases page always provides source code compatible with the latest MSVC compilers.
-
-If you encounter compilation errors related to MinHook APIs:
-- Ensure you're using MinHook v2.8.2 or newer
-- The `MH_Initialize()`, `MH_CreateHook()`, `MH_EnableHook()` API should be consistent
-- The CMakeLists.txt uses the modern API style
+### MinGW-w64
+Works with both the win32 and POSIX thread flavours, but the rest of the native
+layer requires the POSIX flavour (`std::thread`).

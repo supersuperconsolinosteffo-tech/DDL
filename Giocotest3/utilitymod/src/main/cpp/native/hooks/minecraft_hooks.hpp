@@ -4,6 +4,7 @@
 #pragma once
 
 #include <MinHook.h>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
@@ -99,6 +100,7 @@ private:
     // Pattern scanning for finding functions
     uintptr_t findPattern(const std::string& moduleName, const std::string& pattern);
     uintptr_t findPattern(const std::string& pattern);
+    uintptr_t findPatternInRange(uintptr_t start, size_t size, const std::string& pattern);
 
     void log(const std::string& message);
     void error(const std::string& message);

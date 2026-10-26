@@ -1,0 +1,27 @@
+# CMake build trees
+build/
+build-*/
+cmake-build-*/
+
+# Build outputs
+*.dll
+*.dylib
+*.so
+*.a
+*.lib
+*.obj
+*.o
+*.pdb
+*.ilk
+*.exp
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

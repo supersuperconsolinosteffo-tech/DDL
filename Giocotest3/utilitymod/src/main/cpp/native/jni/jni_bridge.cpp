@@ -4,10 +4,36 @@
 #include "jni_bridge.hpp"
 #include "native_client.hpp"
 
-#include <dlfcn.h>
-#include <windows.h>
+#include <cstdarg>
 #include <iostream>
 #include <filesystem>
+
+#if defined(_WIN32)
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <windows.h>
+#else
+    #include <dlfcn.h>
+#endif
+
+#if defined(_WIN32)
+// Handle of the JVM library loaded in loadJvm(); kept alive so that the
+// JNI_CreateJavaVM / JNI_GetCreatedJavaVMs entry points resolved from it stay
+// valid. We do not link against jvm.lib: the DLL must be locatable at runtime
+// instead of at link time.
+static HMODULE g_jvmLibrary = nullptr;
+
+namespace {
+using JniCreateJavaVmFn = jint (JNICALL*)(JavaVM**, void**, void*);
+using JniGetCreatedJavaVmsFn = jint (JNICALL*)(JavaVM**, jsize, jsize*);
+
+void* resolveJvmSymbol(const char* name) {
+    if (!g_jvmLibrary) return nullptr;
+    return reinterpret_cast<void*>(GetProcAddress(g_jvmLibrary, name));
+}
+} // namespace
+#endif
 
 namespace utilitymod {
 
@@ -90,6 +116,7 @@ bool JniBridge::loadJvm(const std::string& jvmLibraryPath) {
         log("Failed to load JVM: " + libPath + " (error: " + std::to_string(GetLastError()) + ")");
         return false;
     }
+    g_jvmLibrary = handle;
 #else
     void* handle = dlopen(libPath.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (!handle) {
@@ -121,7 +148,17 @@ bool JniBridge::createJvm() {
     vm_args.options = options;
     vm_args.ignoreUnrecognized = JNI_TRUE;
 
+#if defined(_WIN32)
+    // Resolved dynamically so that the build does not require jvm.lib.
+    auto createJavaVM = reinterpret_cast<JniCreateJavaVmFn>(resolveJvmSymbol("JNI_CreateJavaVM"));
+    if (!createJavaVM) {
+        log("JNI_CreateJavaVM not found in loaded JVM library");
+        return false;
+    }
+    jint result = createJavaVM(&jvm_, reinterpret_cast<void**>(&env_), &vm_args);
+#else
     jint result = JNI_CreateJavaVM(&jvm_, reinterpret_cast<void**>(&env_), &vm_args);
+#endif
     if (result != JNI_OK) {
         log("Failed to create JVM: " + std::to_string(result));
         return false;
