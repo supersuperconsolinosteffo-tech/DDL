@@ -1,0 +1,15 @@
+{
+  "gui.utilitymod.title": "UtilityMod",
+  "category.utilitymod.movement": "Movement",
+  "category.utilitymod.combat": "Combat",
+  "category.utilitymod.player": "Player",
+  "category.utilitymod.world": "World",
+  "category.utilitymod.misc": "Miscellaneous",
+  "key.utilitymod.open_menu": "Open UtilityMod Menu",
+  "category.utilitymod.main": "UtilityMod",
+  "module.utilitymod.autowalk": "AutoWalk",
+  "module.utilitymod.autoeat": "AutoEat",
+  "module.utilitymod.autosprint": "AutoSprint",
+  "module.utilitymod.freecam": "FreeCam",
+  "module.utilitymod.noclip": "NoClip"
+}

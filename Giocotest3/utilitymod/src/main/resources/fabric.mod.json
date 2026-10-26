@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "utilitymod",
+  "version": "${version}",
+  "name": "UtilityMod",
+  "description": "A single-player utility mod with a native C++ client layer using existing Minecraft packets only.",
+  "authors": ["Player"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/utilitymod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.utilitymod.UtilityMod"],
+    "client": ["com.utilitymod.client.UtilityModClient"]
+  },
+  "mixins": [],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "1.21.11",
+    "java": ">=17"
+  }
+}

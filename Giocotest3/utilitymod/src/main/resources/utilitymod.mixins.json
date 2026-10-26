@@ -1,0 +1,7 @@
+// utilitymod.mixins.json - No mixins used, all via events and existing packets
+{
+  "required": true,
+  "package": "com.utilitymod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": []
+}
