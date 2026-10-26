@@ -8,8 +8,8 @@ Cross-compiled on Linux with MinGW-w64 (LLVM/Zig toolchain, clang 22.1.8) from
 | Property | Value |
 |----------|-------|
 | Architecture | x86-64 (PE32+, DLL) |
-| Size | 1,966,080 bytes |
-| SHA-256 | `12fde73a388d2c6614e1eaa625ed423972fb77536529ca24dba5666cd73ecd40` |
+| Size | 1,966,592 bytes |
+| SHA-256 | `a274c643ea13ef85987e10dd520116533bae3ece16a65adf997bfe4961eb0688` |
 | Minimum Windows | Windows 10 (Universal CRT + `d3dcompiler_47.dll`) |
 
 ### Exports (18)

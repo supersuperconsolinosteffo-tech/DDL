@@ -18,8 +18,15 @@ public:
     JniBridge();
     ~JniBridge();
 
-    // Initialize the JNI bridge, loading the JVM
+    // Initialize the JNI bridge, loading the JVM.
+    // Only for a standalone process that does not have a JVM yet. When the
+    // library is loaded by Minecraft via System.load(), use
+    // attachToExistingVm() instead - creating a second JVM is not allowed.
     bool initialize(const std::string& jvmLibraryPath = "");
+
+    // Adopt the JavaVM of the already-running JVM (the normal path when the
+    // mod calls System.load on this library). Does not load or create a JVM.
+    bool attachToExistingVm(JavaVM* vm);
 
     // Shutdown the JNI bridge
     void shutdown();

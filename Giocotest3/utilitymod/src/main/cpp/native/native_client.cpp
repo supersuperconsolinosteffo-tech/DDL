@@ -29,7 +29,12 @@ bool NativeClient::initialize(const NativeConfig& config) {
         // Initialize JNI Bridge first (needed for callbacks)
         if (config_.enableJniBridge) {
             jniBridge_ = std::make_unique<JniBridge>();
-            if (!jniBridge_->initialize(config_.jvmLibraryPath)) {
+            // Loaded by the game (JNI_OnLoad): attach to its JVM. Standalone
+            // helper (UtilityMod_Initialize): load/create a JVM ourselves.
+            const bool bridgeReady = javaVm_
+                ? jniBridge_->attachToExistingVm(javaVm_)
+                : jniBridge_->initialize(config_.jvmLibraryPath);
+            if (!bridgeReady) {
                 error("Failed to initialize JNI bridge");
                 return false;
             }

@@ -65,9 +65,35 @@ bool JniBridge::initialize(const std::string& jvmLibraryPath) {
     return true;
 }
 
+bool JniBridge::attachToExistingVm(JavaVM* vm) {
+    if (!vm) return false;
+    if (jvm_ == vm) return true;
+
+    jvm_ = vm;
+    mainThreadId_ = std::this_thread::get_id();
+
+    JNIEnv* env = nullptr;
+    jint result = jvm_->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8);
+    if (result != JNI_OK || !env) {
+        log("attachToExistingVm: GetEnv failed (" + std::to_string(result) + ")");
+        jvm_ = nullptr;
+        return false;
+    }
+    env_ = env;
+
+    // JVMTI is optional: only available when started with -agentlib/-javaagent.
+    if (jvm_->GetEnv(reinterpret_cast<void**>(&jvmti_), JVMTI_VERSION_1_0) != JNI_OK) {
+        jvmti_ = nullptr;
+    }
+
+    log("JNI bridge attached to the existing JVM");
+    return true;
+}
+
 void JniBridge::shutdown() {
     if (jvm_) {
-        jvm_->DestroyJavaVM();
+        // Never call DestroyJavaVM() here: when the VM was adopted from a
+        // running Minecraft process, destroying it would kill the game.
         jvm_ = nullptr;
         env_ = nullptr;
         jvmti_ = nullptr;

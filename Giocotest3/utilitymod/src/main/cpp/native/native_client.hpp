@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <jni.h>
+
 #include <cstdint>
 #include <array>
 #include <memory>
@@ -83,8 +85,13 @@ public:
     // Request a tick action to be sent to Java (queued for next tick)
     void requestTickAction(ModuleId moduleId, ActionId actionId, const std::unordered_map<std::string, std::string>& params = {});
 
-    // Get the JNI bridge
+    // Get the JNI bridge (null until initialize() creates it)
     JniBridge* getJniBridge() { return jniBridge_.get(); }
+
+    // Record the JavaVM supplied to JNI_OnLoad. Stored so that initialize()
+    // can attach the bridge to the running JVM instead of creating a new one.
+    void setJavaVm(JavaVM* vm) { javaVm_ = vm; }
+    JavaVM* getJavaVm() const { return javaVm_; }
 
     // Get the hook manager
     MinecraftHooks* getHooks() { return hooks_.get(); }
@@ -106,6 +113,7 @@ private:
 
     bool initialized_ = false;
     NativeConfig config_;
+    JavaVM* javaVm_ = nullptr;  // set by JNI_OnLoad when loaded by the JVM
 
     std::unique_ptr<JniBridge> jniBridge_;
     std::unique_ptr<MinecraftHooks> hooks_;

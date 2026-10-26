@@ -32,12 +32,24 @@ JNIEXPORT jint JNICALL Java_com_utilitymod_nativeclient_NativeBridge_getEntityId
 
 // Called when the native library is loaded by Java
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
-    // Store the JavaVM for later use
-    NativeClient::instance().getJniBridge()->initialize("");
-    
+    (void)reserved;
+
+    if (!vm) {
+        return JNI_ERR;
+    }
+
+    // The JVM already exists (Minecraft called System.load on this library):
+    // remember it so the bridge attaches instead of spawning a second JVM.
+    NativeClient::instance().setJavaVm(vm);
+
+    // Also adopt it right away if a bridge already exists.
+    if (JniBridge* bridge = NativeClient::instance().getJniBridge()) {
+        bridge->attachToExistingVm(vm);
+    }
+
     // Register native methods for NativeBridge
-    JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8) != JNI_OK) {
+    JNIEnv* env = nullptr;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8) != JNI_OK || !env) {
         return JNI_ERR;
     }
 
