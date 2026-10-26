@@ -5,6 +5,8 @@ cmake-build-*/
 
 # Build outputs
 *.dll
+# ...except the distributable artifact under dist/ (see dist/windows-x64)
+!Giocotest3/dist/**
 *.dylib
 *.so
 *.a
